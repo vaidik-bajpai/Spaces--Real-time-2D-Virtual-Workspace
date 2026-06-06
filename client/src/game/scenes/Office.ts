@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import { GameObjects, Scene } from 'phaser';
 
 type PlayerDirectionType = "UP" | "DOWN" | "LEFT" | "RIGHT";
@@ -7,7 +8,7 @@ export class Office extends Scene {
     logo: GameObjects.Image;
     title: GameObjects.Text;
     logoTween: Phaser.Tweens.Tween | null;
-    player: GameObjects.Sprite;
+    player: Phaser.Physics.Arcade.Sprite;
     cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     lastDirection: PlayerDirectionType
 
@@ -30,14 +31,72 @@ export class Office extends Scene {
 
         const groundLayer = map.createLayer('Ground', tileset);
         const wallsLayer = map.createLayer('Walls', tileset);
+        const bordersLayer = map.createLayer('Borders', tileset);
 
-        groundLayer?.setDepth(0);
-        wallsLayer?.setDepth(1);
+        if (!groundLayer || !wallsLayer || !bordersLayer) {
+            console.log("could not load the map")
+            return
+        }
 
-        this.player = this.add.sprite(5 * 32, 5 * 32, 'alex', 0);
+        groundLayer.setDepth(0);
+        wallsLayer.setDepth(1);
+        bordersLayer.setDepth(2);
+
+        this.player = this.physics.add.sprite(5 * 32, 5 * 32, 'alex', 0);
         this.player.setOrigin(0.5, 1);
         this.player.setScale(2);
         this.player.setDepth(10);
+
+        this.player.body?.setSize(16, 22);
+        this.player.body?.setOffset(0, 10);
+
+        // Read rectangle objects from Tiled object layer
+        const collisionLayer = map.getObjectLayer("Object");
+
+        if (!collisionLayer) {
+            console.log("could not load Object collision layer");
+            return;
+        }
+
+        const collisionGroup = this.physics.add.staticGroup();
+
+        collisionLayer.objects.forEach((object) => {
+            if (
+                object.x === undefined ||
+                object.y === undefined ||
+                object.width === undefined ||
+                object.height === undefined
+            ) {
+                return;
+            }
+
+            // Make this visible while debugging.
+            // Later change alpha from 0.35 to 0.
+            const rect = this.add.rectangle(
+                object.x + object.width / 2,
+                object.y + object.height / 2,
+                object.width,
+                object.height,
+                0xff0000,
+                0.35
+            );
+
+            this.physics.add.existing(rect, true);
+
+            collisionGroup.add(rect);
+        });
+
+        this.physics.add.collider(this.player, collisionGroup);
+
+        this.cameras.main.setBounds(
+            0,
+            0,
+            map.widthInPixels,
+            map.heightInPixels
+        );
+
+        this.cameras.main.setZoom(2);
+        this.cameras.main.startFollow(this.player);
 
         this.anims.create({
             key: 'alex-walk-down',
@@ -122,42 +181,37 @@ export class Office extends Scene {
         this.cursors = this.input.keyboard?.createCursorKeys();
     }
 
-    update(_time: number, delta: number) {
+    update(_time: number) {
         if (!this.cursors) {
             return;
         }
 
         const speed = 120;
-        const distance = speed * (delta / 1000);
 
-        let moveX = 0;
-        let moveY = 0;
+        this.player.setVelocity(0);
+
         let animationKey = "";
 
         if (this.cursors.down.isDown) {
-            moveY = 1;
+            this.player.setVelocityY(speed);
             this.lastDirection = "DOWN";
             animationKey = 'alex-walk-down';
         } else if (this.cursors.left.isDown) {
-            moveX = -1;
+            this.player.setVelocityX(-speed);
             this.lastDirection = "LEFT";
             animationKey = 'alex-walk-left';
         } else if (this.cursors.right.isDown) {
-            moveX = 1;
+            this.player.setVelocityX(speed);
             this.lastDirection = "RIGHT";
             animationKey = 'alex-walk-right';
         } else if (this.cursors.up.isDown) {
-            moveY = -1;
+            this.player.setVelocityY(-speed);
             this.lastDirection = "UP";
             animationKey = 'alex-walk-up';
         }
 
-        const isMoving = moveX !== 0 || moveY !== 0;
-        if (isMoving) {
-            // console.log(`alex is moving: ${`alex-walk-${this.lastDirection.toLowerCase()}`}`)
-
-            this.player.x += moveX * distance;
-            this.player.y += moveY * distance;
+        if (animationKey) {
+            // console.log(`alex is moving: ${`alex-walk-${this.lastDirection.toLowerCase()}`}`)    
             this.player.play(animationKey, true)
         } else {
             this.player.play(`alex-idle-${this.lastDirection.toLowerCase()}`, true)
