@@ -19,36 +19,56 @@ export class Office extends Scene {
 
     create() {
         const map = this.make.tilemap({ key: 'office-map' });
-        const tileset = map.addTilesetImage(
+        const rbFreeTileset = map.addTilesetImage(
             'Room_Builder_free_32x32',
-            'room-builder'
+            'room-builder-free'
+        )
+        const modernOfficeTileset = map.addTilesetImage(
+            'Modern_Office_Black_Shadow',
+            'modern-office-shadow'
+        )
+        const intFreeTileset = map.addTilesetImage(
+            'Interiors_free_32x32',
+            'interior-free',
         )
 
-        if (!tileset) {
+        if (!rbFreeTileset || !modernOfficeTileset || !intFreeTileset) {
             console.log("could not create tileset")
             return
         }
 
-        const groundLayer = map.createLayer('Ground', tileset);
-        const wallsLayer = map.createLayer('Walls', tileset);
-        const bordersLayer = map.createLayer('Borders', tileset);
+        const groundLayer = map.createLayer('Ground', rbFreeTileset);
+        const interiorLayer = map.createLayer('Interior', [modernOfficeTileset, intFreeTileset]);
+        const itemsLayer = map.createLayer('Items', modernOfficeTileset);
+        const tableLayer = map.createLayer('Table', modernOfficeTileset);
+        const onTableLayer = map.createLayer('On Table', modernOfficeTileset)
+        const behindTableLayer = map.createLayer('Behind Table', modernOfficeTileset);
+        const inFrontTableLayer = map.createLayer('In Front Table', modernOfficeTileset);
+        const wallsLayer = map.createLayer('Walls', rbFreeTileset);
+        const bordersLayer = map.createLayer('Borders', rbFreeTileset);
 
-        if (!groundLayer || !wallsLayer || !bordersLayer) {
+        if (!groundLayer || !wallsLayer || !bordersLayer || !itemsLayer || !tableLayer || !onTableLayer || !behindTableLayer || !inFrontTableLayer || !wallsLayer || !bordersLayer) {
             console.log("could not load the map")
             return
         }
 
         groundLayer.setDepth(0);
         wallsLayer.setDepth(1);
-        bordersLayer.setDepth(2);
+        interiorLayer.setDepth(2);
+        itemsLayer.setDepth(3);
+        tableLayer.setDepth(4);
+        onTableLayer.setDepth(5);
+        behindTableLayer.setDepth(6);
+        inFrontTableLayer.setDepth(7);
+        bordersLayer.setDepth(8);
 
         this.player = this.physics.add.sprite(5 * 32, 5 * 32, 'alex', 0);
         this.player.setOrigin(0.5, 1);
         this.player.setScale(2);
         this.player.setDepth(10);
 
-        this.player.body?.setSize(16, 22);
-        this.player.body?.setOffset(0, 10);
+        this.player.body?.setSize(10, 5);
+        this.player.body?.setOffset(3, 27);
 
         // Read rectangle objects from Tiled object layer
         const collisionLayer = map.getObjectLayer("Object");

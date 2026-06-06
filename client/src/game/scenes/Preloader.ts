@@ -29,11 +29,19 @@ export class Preloader extends Scene {
         this.load.setPath('assets');
 
         // load office map
-        this.load.tilemapTiledJSON('office-map', 'maps/office_map_v5.tmj')
+        this.load.tilemapTiledJSON('office-map', 'maps/office_map_v8.tmj')
         this.load.image(
-            'room-builder',
+            'room-builder-free',
             'Interiors_free/32x32/Room_Builder_free_32x32.png'
         );
+        this.load.image(
+            'modern-office-shadow',
+            'archive/tileset/Modern_Office_Black_Shadow.png'
+        );
+        this.load.image(
+            'interior-free',
+            'Interiors_free/32x32/Interiors_free_32x32.png'
+        )
 
         //load office sprite
         this.load.spritesheet(
