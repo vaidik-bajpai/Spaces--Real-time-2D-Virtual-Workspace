@@ -29,7 +29,7 @@ export class Preloader extends Scene {
         this.load.setPath('assets');
 
         // load office map
-        this.load.tilemapTiledJSON('office-map', 'maps/office_map_v8.tmj')
+        this.load.tilemapTiledJSON('office-map', 'maps/office_map_v1.tmj')
         this.load.image(
             'room-builder-free',
             'Interiors_free/32x32/Room_Builder_free_32x32.png'
