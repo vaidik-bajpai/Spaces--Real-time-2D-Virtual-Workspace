@@ -49,4 +49,14 @@ export const playerAnimations = [
         start: 120,
         end: 125,
     },
+    {
+        key: 'alex-sit-up',
+        start: 132,
+        end: 137,
+    },
+    {
+        key: 'alex-sit-down',
+        start: 138,
+        end: 142,
+    }
 ]

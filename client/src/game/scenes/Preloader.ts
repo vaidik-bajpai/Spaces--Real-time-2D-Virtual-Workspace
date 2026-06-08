@@ -43,10 +43,19 @@ export class Preloader extends Scene {
             'Interiors_free/32x32/Interiors_free_32x32.png'
         )
 
+        this.load.spritesheet(
+            "modern-office-shadow-sheet",
+            "archive/tileset/Modern_Office_Black_Shadow.png",
+            {
+                frameWidth: 32,
+                frameHeight: 32,
+            }
+        );
+
         //load office sprite
         this.load.spritesheet(
             'alex',
-            'Characters_free/Alex_16x16.png',
+            './Alex_16x16.png',
             {
                 frameWidth: 16,
                 frameHeight: 32,
