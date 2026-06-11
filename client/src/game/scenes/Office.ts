@@ -42,7 +42,7 @@ export class Office extends Scene {
     playerState: "IDLE" | "WALK" | "SIT";
     interactKey?: Phaser.Input.Keyboard.Key;
     proximityHighlight?: Phaser.GameObjects.Rectangle;
-    objectCollisionGroup?: Phaser.Physics.Arcade.StaticGroup;
+    objectCollisionGroup: Phaser.Physics.Arcade.StaticGroup;
 
     private loadAnimations() {
         playerAnimations.forEach((animation) => {
@@ -260,6 +260,72 @@ export class Office extends Scene {
         })
     }
 
+    private loadWallCollideLayer() {
+        const wallLayer = this.map.getObjectLayer('WallCollide');
+        if (wallLayer === null) {
+            throw new Error("could not load the wall layer");
+        }
+
+        const wallTilesets = this.tilesets.get('Walls');
+        if (wallTilesets === undefined) throw new Error("could not find wallTilesets for the key 'Walls'")
+        const sortedTilesets = [...wallTilesets].sort(
+            (a, b) => a.firstgid - b.firstgid
+        );
+
+        this.objectCollisionGroup = this.physics.add.staticGroup();
+
+        wallLayer.objects.forEach((obj) => {
+            if (obj.gid === undefined || obj.x === undefined || obj.y === undefined) return;
+
+            const tileset = sortedTilesets.find((ts, index) => {
+                const next = sortedTilesets[index + 1];
+
+                const start = ts.firstgid;
+                const end = next ? next.firstgid : Infinity;
+
+                return obj.gid! >= start && obj.gid! < end;
+            });
+
+            if (!tileset) {
+                console.warn("No tileset found for wall gid:", obj.gid);
+                return;
+            }
+
+            const frameIndex = obj.gid - tileset.firstgid;
+
+            let textureKey: string;
+
+            if (tileset.name === 'Room_Builder_Walls') {
+                textureKey = 'room-builder-walls';
+            } else if (tileset.name === 'Room_Builder_Office') {
+                textureKey = 'room-builder-office';
+            } else {
+                console.warn("Unknown wall tileset:", tileset.name);
+                return;
+            }
+
+            if (tileset.name === 'Room_Builder_Walls') {
+                textureKey = 'room-builder-walls';
+            } else if (tileset.name === 'Room_Builder_Office') {
+                textureKey = 'room-builder-office';
+            } else {
+                console.warn("Unknown wall tileset:", tileset.name);
+                return;
+            }
+
+            const wall = this.objectCollisionGroup.create(
+                obj.x,
+                obj.y,
+                textureKey,
+                frameIndex
+            );
+
+            wall.setOrigin(0, 1);
+            wall.setDepth(-1);
+            wall.refreshBody();
+        })
+    }
+
     private loadLayers(): OfficeLayers {
         const map = this.map;
         const ts = this.tilesets;
@@ -277,6 +343,7 @@ export class Office extends Scene {
 
         this.loadChairLayer();
         this.loadWallLayer();
+        this.loadWallCollideLayer();
 
         return {
             groundLayer
@@ -320,7 +387,7 @@ export class Office extends Scene {
 
             this.loadPlayer();
 
-            this.physics.add.collider(this.player, layers.groundLayer);
+            this.physics.add.collider(this.player, this.objectCollisionGroup);
 
             this.setLayerDepths(layers);
 
