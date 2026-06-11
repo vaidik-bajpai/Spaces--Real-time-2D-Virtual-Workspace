@@ -30,29 +30,46 @@ export class Preloader extends Scene {
 
         // load office map
         this.load.tilemapTiledJSON('office-map', 'maps/office_map_v1.tmj')
-        this.load.image(
-            'room-builder-free',
-            'Interiors_free/32x32/Room_Builder_free_32x32.png'
-        );
-        this.load.image(
-            'modern-office-shadow',
-            'archive/tileset/Modern_Office_Black_Shadow.png'
-        );
-        this.load.image(
-            'interior-free',
-            'Interiors_free/32x32/Interiors_free_32x32.png'
-        )
-
         this.load.spritesheet(
-            "modern-office-shadow-sheet",
-            "archive/tileset/Modern_Office_Black_Shadow.png",
+            'modern-office-shadow',
+            'archive/tileset/Modern_Office_Black_Shadow.png',
+            {
+                frameWidth: 32,
+                frameHeight: 64,
+            }
+        );
+        this.load.spritesheet(
+            'room-builder-office',
+            'archive/Room_Builder_Office.png',
             {
                 frameWidth: 32,
                 frameHeight: 32,
             }
         );
 
-        //load office sprite
+        this.load.image(
+            'room-builder-floors',
+            'archive/Room_Builder_Floors.png'
+        );
+
+        this.load.spritesheet(
+            'room-builder-walls',
+            'archive/Room_Builder_Walls.png',
+            {
+                frameWidth: 32,
+                frameHeight: 32
+            }
+        );
+
+        this.load.spritesheet(
+            "room-builder-office-sheet",
+            "archive/Room_Builder_Office.png",
+            {
+                frameWidth: 32,
+                frameHeight: 32,
+            }
+        );
+
         this.load.spritesheet(
             'alex',
             './Alex_16x16.png',
