@@ -3703,6 +3703,22 @@
                  "id":972,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"DOWN"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3716,6 +3732,22 @@
                  "id":974,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"DOWN"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3729,6 +3761,22 @@
                  "id":973,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"DOWN"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3742,6 +3790,22 @@
                  "id":975,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"RIGHT"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3755,6 +3819,22 @@
                  "id":976,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"UP"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3768,6 +3848,22 @@
                  "id":978,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"UP"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3781,6 +3877,22 @@
                  "id":977,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"UP"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -3794,6 +3906,22 @@
                  "id":979,
                  "name":"",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"LEFT"
+                        }, 
+                        {
+                         "name":"prompt",
+                         "type":"string",
+                         "value":"Press E to sit"
+                        }, 
+                        {
+                         "name":"radius",
+                         "type":"int",
+                         "value":1
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,

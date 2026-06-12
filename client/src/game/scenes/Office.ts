@@ -4,26 +4,22 @@ import { playerAnimations } from "../constants/animations";
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
-interface Interactible {
-    id: number;
-
+interface Chair {
     x: number;
     y: number;
-
-    // for the place to make the character sit
-    centerX: number;
-    centerY: number;
 
     width: number;
     height: number;
 
-    type: string;
-    facing: Direction;
-    prompt: string;
-    radius: number;
+    sitX: number;
+    sitY: number;
 
-    multiUse: boolean;
-    isInUse: boolean;
+    proximityX: number;
+    proximityY: number;
+
+    facing: Direction;
+    radius: number;
+    prompt: string;
 }
 
 type OfficeLayers = {
@@ -37,8 +33,9 @@ export class Office extends Scene {
     player: Phaser.Physics.Arcade.Sprite;
     cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     lastDirection: Direction = "DOWN";
-    interactibles: Interactible[] = [];
-    prompt: string = "";
+    chairs: Chair[] = [];
+    playerPrompt: string = "";
+    promptAlert: Phaser.GameObjects.Text
     playerState: "IDLE" | "WALK" | "SIT";
     interactKey?: Phaser.Input.Keyboard.Key;
     proximityHighlight?: Phaser.GameObjects.Rectangle;
@@ -78,58 +75,28 @@ export class Office extends Scene {
         this.player.body?.setOffset(3, 27);
     }
 
-    private searchProximity(): (Interactible | null) {
-        const playerX = this.player.x;
-        const playerY = this.player.y;
+    private searchProximity(): Chair | null {
+        for (const chair of this.chairs) {
+            const radiusPx = chair.radius * 32;
 
-        const interactible = this.interactibles.find((obj) => {
-            const inProximity =
-                playerX >= obj.centerX - obj.radius &&
-                playerX <= obj.centerX + obj.radius &&
-                playerY >= obj.centerY - obj.radius &&
-                playerY <= obj.centerY + obj.radius;
+            const left = chair.proximityX - radiusPx;
+            const right = chair.proximityX + radiusPx;
+            const up = chair.proximityY - radiusPx;
+            const down = chair.proximityY + radiusPx;
 
-            return inProximity && (obj.multiUse || !obj.isInUse)
-        })
-
-        if (interactible) {
-            this.prompt = interactible.prompt;
-
-            if (!this.proximityHighlight) {
-                this.proximityHighlight = this.add.rectangle(
-                    interactible.centerX,
-                    interactible.centerY,
-                    interactible.width,
-                    interactible.height,
-                    0x60a5fa,
-                    0.10,
-                );
-
-                this.proximityHighlight.setStrokeStyle(2, 0x60a5fa);
-                this.proximityHighlight.setDepth(4);
+            if (
+                this.player.x >= left &&
+                this.player.x <= right &&
+                this.player.y >= up &&
+                this.player.y <= down
+            ) {
+                return chair;
             }
-
-            this.proximityHighlight.setPosition(
-                interactible.centerX,
-                interactible.centerY
-            );
-
-            this.proximityHighlight.setSize(
-                interactible.width,
-                interactible.height
-            );
-
-            this.proximityHighlight.setVisible(true);
-
-            return interactible
-        };
-
-        this.prompt = "";
-        if (this.proximityHighlight) {
-            this.proximityHighlight.setVisible(false);
         }
+
         return null;
     }
+
 
     constructor() {
         super('Office');
@@ -197,10 +164,40 @@ export class Office extends Scene {
                 frameIndex,
             )
 
+            const props: Record<string, any> = {};
+            obj.properties.map((prop: any) => {
+                props[prop.name] = prop.value;
+            })
+
+            const sitX = obj.x + (props.sitOffsetX ?? obj.width! / 2);
+            const sitY = obj.y + (props.sitOffsetY ?? -20);
+
+            const proximityX = sitX;
+            const proximityY = sitY;
+
+            this.chairs.push({
+                x: obj.x,
+                y: obj.y,
+
+                width: obj.width!,
+                height: obj.height!,
+
+                sitX,
+                sitY,
+
+                proximityX,
+                proximityY,
+
+                facing: props.facing ?? "DOWN",
+                radius: props.radius ?? 1,
+                prompt: props.prompt ?? "Press E to sit",
+            });
 
             chair.setOrigin(0, 1);
-            chair.setDepth(chair.y - 8);
+            chair.setDepth(chair.y - 16);
         })
+
+        console.log("chair metadata: ", this.chairs);
     }
 
     private loadWallLayer() {
@@ -320,6 +317,8 @@ export class Office extends Scene {
                 frameIndex
             );
 
+
+
             wall.setOrigin(0, 1);
             wall.setDepth(-1);
             wall.refreshBody();
@@ -388,6 +387,19 @@ export class Office extends Scene {
             this.loadPlayer();
 
             this.physics.add.collider(this.player, this.objectCollisionGroup);
+            this.promptAlert = this.add.text(this.player.x, this.player.y - 32, "", {
+                fontSize: "8px",
+                color: "#ffffff",
+                backgroundColor: "#111827",
+                padding: {
+                    x: 6,
+                    y: 3,
+                },
+            });
+
+            this.promptAlert.setOrigin(0.5, 1);
+            this.promptAlert.setDepth(9999);
+            this.promptAlert.setVisible(false);
 
             this.setLayerDepths(layers);
 
@@ -408,45 +420,66 @@ export class Office extends Scene {
         }
 
         this.player.setDepth(this.player.y)
+        this.promptAlert.setPosition(
+            this.player.x,
+            this.player.y - 50
+        );
 
         const speed = 160;
         this.player.setVelocity(0);
 
-        if (this.cursors.down.isDown) {
-            this.player.setVelocityY(speed);
-            this.lastDirection = "DOWN";
-            this.playerState = "WALK";
-        } else if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-speed);
-            this.lastDirection = "LEFT";
-            this.playerState = "WALK";
-        } else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(speed);
-            this.lastDirection = "RIGHT";
-            this.playerState = "WALK";
-        } else if (this.cursors.up.isDown) {
-            this.player.setVelocityY(-speed);
-            this.lastDirection = "UP";
-            this.playerState = "WALK";
-        } else {
-            this.player.setVelocity(0);
-            if (this.playerState !== "SIT") {
+        if (this.playerState !== "SIT") {
+            if (this.cursors.down.isDown) {
+                this.player.setVelocityY(speed);
+                this.lastDirection = "DOWN";
+                this.playerState = "WALK";
+            } else if (this.cursors.left.isDown) {
+                this.player.setVelocityX(-speed);
+                this.lastDirection = "LEFT";
+                this.playerState = "WALK";
+            } else if (this.cursors.right.isDown) {
+                this.player.setVelocityX(speed);
+                this.lastDirection = "RIGHT";
+                this.playerState = "WALK";
+            } else if (this.cursors.up.isDown) {
+                this.player.setVelocityY(-speed);
+                this.lastDirection = "UP";
+                this.playerState = "WALK";
+            } else {
+                this.player.setVelocity(0);
                 this.playerState = "IDLE";
             }
         }
 
-        const interactible = this.searchProximity();
-        if (interactible) {
+        const chair = this.playerState !== "SIT" ? this.searchProximity() : null;
+        if (chair !== null) {
+            console.log("In the proximity of a chair")
+            this.playerPrompt = chair.prompt
             if (Phaser.Input.Keyboard.JustDown(this.interactKey!)) {
-                this.player.x = interactible.centerX;
-                this.player.y = interactible.centerY;
-                this.lastDirection = interactible.facing;
+                this.player.x = chair.sitX;
+                this.player.y = chair.sitY;
                 this.playerState = "SIT";
+                this.lastDirection = chair.facing;
+                this.playerPrompt = "Press E to get up";
+            }
+        } else {
+            if (this.playerState !== "SIT") {
+                this.promptAlert.setVisible(false);
+                this.playerPrompt = "";
             }
         }
 
+        if (this.playerState === "SIT" && Phaser.Input.Keyboard.JustDown(this.interactKey!)) {
+            this.playerState = "IDLE";
+        }
+
         this.player.anims.play(`alex-${this.playerState.toLowerCase()}-${this.lastDirection.toLowerCase()}`, true)
-        //console.log(`alex-${this.playerState.toLowerCase()}-${this.lastDirection.toLowerCase()}`)
+        if (this.playerPrompt) {
+            this.promptAlert.setText(this.playerPrompt);
+            this.promptAlert.setVisible(true);
+        } else {
+            this.promptAlert.setVisible(false);
+        }
     }
 
     changeScene() {
