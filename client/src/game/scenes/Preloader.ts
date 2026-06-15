@@ -78,6 +78,33 @@ export class Preloader extends Scene {
                 frameHeight: 32,
             }
         )
+
+        this.load.spritesheet(
+            'amelia',
+            './Amelia_16x16.png',
+            {
+                frameWidth: 16,
+                frameHeight: 32,
+            }
+        )
+
+        this.load.spritesheet(
+            'bob',
+            './Bob_16x16.png',
+            {
+                frameWidth: 16,
+                frameHeight: 32,
+            }
+        )
+
+        this.load.spritesheet(
+            'adam',
+            './Adam_16x16.png',
+            {
+                frameWidth: 16,
+                frameHeight: 32,
+            }
+        )
     }
 
     create() {

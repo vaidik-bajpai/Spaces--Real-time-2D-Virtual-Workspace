@@ -1,6 +1,8 @@
 import * as Phaser from "phaser";
 import { Scene } from 'phaser';
-import { playerAnimations } from "../constants/animations";
+import { playerAnimations, playerSprites } from "../constants/animations";
+import { EventBus } from "../EventBus";
+import { MainMenuData } from "../../components/MainMenu";
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
@@ -40,32 +42,38 @@ export class Office extends Scene {
     interactKey?: Phaser.Input.Keyboard.Key;
     proximityHighlight?: Phaser.GameObjects.Rectangle;
     objectCollisionGroup: Phaser.Physics.Arcade.StaticGroup;
+    selectedSpriteKey: string
 
     private loadAnimations() {
-        playerAnimations.forEach((animation) => {
-            if (this.anims.exists(animation.key)) {
-                return;
-            }
+        playerSprites.forEach((spriteKey) => {
+            playerAnimations.forEach((animation) => {
+                if (this.anims.exists(`${spriteKey}-${animation.action}-${animation.direction}`)) {
+                    return;
+                }
 
-            this.anims.create({
-                key: animation.key,
-                frames: this.anims.generateFrameNumbers("alex", {
-                    start: animation.start,
-                    end: animation.end,
-                }),
-                frameRate: 8,
-                repeat: -1,
+                this.anims.create({
+                    key: `${spriteKey}-${animation.action}-${animation.direction}`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: animation.start,
+                        end: animation.end,
+                    }),
+                    frameRate: 8,
+                    repeat: -1,
+                });
+
+                console.log(
+                    `${spriteKey}-${animation.action}-${animation.direction}`,
+                    this.anims.exists(`${spriteKey}-${animation.action}-${animation.direction}`)
+                );
             });
+        })
 
-            console.log(
-                animation.key,
-                this.anims.exists(animation.key)
-            );
-        });
     }
 
-    private loadPlayer() {
-        this.player = this.physics.add.sprite(5 * 32, 5 * 32, 'alex', 0);
+    private loadPlayer(spriteName: string) {
+        this.selectedSpriteKey = spriteName
+
+        this.player = this.physics.add.sprite(5 * 32, 5 * 32, spriteName, 0);
         this.player.setOrigin(0.5, 1);
         this.player.setScale(2);
         this.player.setDepth(10);
@@ -372,6 +380,28 @@ export class Office extends Scene {
         );
     }
 
+    private spawnPlayer(spriteName: string) {
+        this.loadPlayer(spriteName)
+        this.physics.add.collider(this.player, this.objectCollisionGroup);
+
+        this.promptAlert = this.add.text(this.player.x, this.player.y - 32, "", {
+            fontSize: "8px",
+            color: "#ffffff",
+            backgroundColor: "#111827",
+            padding: {
+                x: 6,
+                y: 3,
+            },
+        });
+        this.promptAlert.setOrigin(0.5, 1);
+        this.promptAlert.setDepth(9999);
+        this.promptAlert.setVisible(false);
+
+        this.setUpCamera();
+        this.setUpInputs();
+        this.loadAnimations();
+    }
+
     create() {
         try {
             this.map = this.loadMap();
@@ -384,30 +414,14 @@ export class Office extends Scene {
                 return;
             }
 
-            this.loadPlayer();
-
-            this.physics.add.collider(this.player, this.objectCollisionGroup);
-            this.promptAlert = this.add.text(this.player.x, this.player.y - 32, "", {
-                fontSize: "8px",
-                color: "#ffffff",
-                backgroundColor: "#111827",
-                padding: {
-                    x: 6,
-                    y: 3,
-                },
+            EventBus.on("player:join", (data: MainMenuData) => {
+                console.log(data.username);
+                console.log(data.spriteName);
+                console.log(data.textureKey);
+                this.spawnPlayer(data.textureKey)
             });
-
-            this.promptAlert.setOrigin(0.5, 1);
-            this.promptAlert.setDepth(9999);
-            this.promptAlert.setVisible(false);
-
+            this.cameras.main.setZoom(2);
             this.setLayerDepths(layers);
-
-
-            this.setUpCamera();
-
-            this.loadAnimations();
-            this.setUpInputs();
         }
         catch (e) {
             alert(e)
@@ -473,7 +487,7 @@ export class Office extends Scene {
             this.playerState = "IDLE";
         }
 
-        this.player.anims.play(`alex-${this.playerState.toLowerCase()}-${this.lastDirection.toLowerCase()}`, true)
+        this.player.anims.play(`${this.selectedSpriteKey}-${this.playerState.toLowerCase()}-${this.lastDirection.toLowerCase()}`, true)
         if (this.playerPrompt) {
             this.promptAlert.setText(this.playerPrompt);
             this.promptAlert.setVisible(true);
